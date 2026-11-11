@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" shape-rendering="crispEdges">
+<title>Elara Ashford - front idle pixel sprite 64x64</title>
+<desc>Original pixel-style front-facing RPG sprite inspired by Elara's light-novel character concept: silver-lavender hair, violet eyes, white cloak, navy outfit, gold trim and glowing blue Aether core.</desc>
+<rect width="64" height="64" fill="none"/>
+<!-- hair silhouette and side locks -->
+<path fill="#555477" d="M19 7h26v4h5v12h-3v15h-4v8h-5v-5H26v5h-5v-8h-4V23h-3V12h5z"/>
+<path fill="#c7c5e4" d="M20 10h24v4h4v10h-4v8h-3v-5H23v5h-3v-8h-3V14h3z"/>
+<path fill="#e9e7f5" d="M23 9h17v4H23zM20 14h4v8h-4zm20 0h4v8h-4zM23 18h4v4h-4z"/>
+<!-- face -->
+<path fill="#f4d8d1" d="M24 19h16v13h-3v4H27v-4h-3z"/>
+<path fill="#d9b4b8" d="M24 27h3v5h3v2h-4v-3h-2zM38 27h2v5h-3v2h-2v-2h3z"/>
+<!-- fringe -->
+<path fill="#b2afd5" d="M20 14h7v5h-3v5h-3v-4h-2zM28 12h7v5h-3v4h-4v-5h-2zM36 13h7v5h-4v5h-3v-5h-2z"/>
+<path fill="#eeedf8" d="M24 13h3v4h-3zM32 12h3v4h-3zM39 14h3v3h-3z"/>
+<!-- eyes -->
+<path fill="#6555a3" d="M25 25h4v3h-4zM36 25h4v3h-4z"/>
+<path fill="#302b56" d="M26 25h2v3h-2zM37 25h2v3h-2z"/>
+<path fill="#ffffff" d="M26 25h1v1h-1zM37 25h1v1h-1z"/>
+<path fill="#bd7185" d="M31 30h3v1h-3z"/>
+<!-- long hair behind shoulders -->
+<path fill="#77769c" d="M17 22h4v19h4v7h-4v-5h-4zM43 22h4v21h-4v5h-4v-7h4z"/>
+<path fill="#c7c5e4" d="M18 25h2v14h2v6h-2v-4h-2zM44 25h2v15h-2v5h-2v-5h2z"/>
+<!-- collar and neck -->
+<path fill="#eecac2" d="M29 35h6v5h-6z"/>
+<path fill="#d8c8e8" d="M25 35h5v5l-3 4-4-5zM34 35h5l2 4-4 5-3-4z"/>
+<!-- cloak -->
+<path fill="#777da9" d="M22 38h20l5 5v15H17V43z"/>
+<path fill="#f3f1fa" d="M23 38h18l4 5v12H19V43z"/>
+<path fill="#d4d2e9" d="M19 45h4v9h-4zM41 43h4v11h-4z"/>
+<path fill="#ffffff" d="M24 40h4v5h-4zM36 40h4v5h-4z"/>
+<!-- inner outfit -->
+<path fill="#34375f" d="M27 40h10v3h3v14H24V43h3z"/>
+<path fill="#4b4e7c" d="M29 42h6v10h-6z"/>
+<path fill="#d7b66b" d="M26 43h3v2h-3zm9 0h3v2h-3zM30 51h4v2h-4z"/>
+<!-- sleeves and gloves -->
+<path fill="#eceaf6" d="M19 43h5v8h-3v3h-3v-7zM40 43h5v4l-2 7h-3v-3h-2z"/>
+<path fill="#b6b4d4" d="M19 48h3v4h-3zM42 48h3v4h-3z"/>
+<!-- Aether core -->
+<path fill="#d6f7ff" d="M30 44h4v2h2v4h-2v2h-4v-2h-2v-4h2z"/>
+<path fill="#47c9ef" d="M31 44h2v2h2v3h-2v2h-2v-2h-2v-3h2z"/>
+<path fill="#ffffff" d="M31 45h2v2h-2z"/>
+<!-- belt and gold accents -->
+<path fill="#272b4d" d="M25 54h14v3H25z"/>
+<path fill="#d9b96f" d="M29 54h6v3h-6z"/>
+<path fill="#f5df9c" d="M30 55h4v1h-4z"/>
+<!-- legs -->
+<path fill="#343653" d="M26 57h5v4h-5zM33 57h5v4h-5z"/>
+<path fill="#d8d8e9" d="M26 60h5v2h-5zM33 60h5v2h-5z"/>
+<!-- boots -->
+<path fill="#f0edf5" d="M25 60h6v2h2v1H24v-2h1zM33 60h6v2h1v1h-9v-1h2z"/>
+<path fill="#d6b66b" d="M25 61h5v1h-5zM34 61h5v1h-5z"/>
+<!-- Aether hair device -->
+<path fill="#30385e" d="M43 13h5v7h-5z"/>
+<path fill="#d8b86e" d="M43 13h4v2h-4zM46 15h2v4h-2z"/>
+<path fill="#53d7f4" d="M44 15h2v3h-2z"/>
+<!-- cloak emblem -->
+<path fill="#d8b86e" d="M31 38h2v2h2v2h-2v2h-2v-2h-2v-2h2z"/>
+</svg>
