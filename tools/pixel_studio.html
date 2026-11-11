@@ -42,6 +42,14 @@ footer{padding:0 18px 20px;color:var(--muted);text-align:center;font-size:12px}
 <aside class="panel right">
 <div class="group"><h2>Tileset palette</h2><p class="status">Quick terrain swatches for painting tiles.</p><div id="tiles"></div><button id="makeTerrain" style="width:100%;margin-top:8px">Generate terrain sheet</button></div>
 <div class="group"><h2>Character presets</h2><label>Body color</label><select id="body"><option value="#4f9b68">Forest green</option><option value="#477fae">Blue</option><option value="#ad514b">Red</option><option value="#7960a5">Purple</option><option value="#b68b3c">Gold</option></select><label>Skin</label><select id="skin"><option value="#f0c7a0">Light</option><option value="#c98f68">Tan</option><option value="#86583f">Dark</option></select><label>Hair</label><select id="hair"><option value="#55352f">Brown</option><option value="#29252b">Black</option><option value="#d6ae55">Blonde</option><option value="#a84c36">Red</option><option value="#456c9b">Blue</option></select><button id="presetChar" class="primary" style="width:100%;margin-top:8px">Create placeholder</button></div>
+<div class="group"><h2>Character Creator</h2>
+<label>Hair style</label><select id="hairStyle"><option value="short">Short</option><option value="long">Long</option><option value="spiky">Spiky</option><option value="hood">Hood</option></select>
+<label>Outfit</label><select id="outfit"><option value="tunic">Adventurer tunic</option><option value="robe">Mage robe</option><option value="armor">Knight armor</option><option value="ranger">Ranger vest</option></select>
+<label>Legs</label><select id="legs"><option value="pants">Dark pants</option><option value="boots">Boots</option><option value="shorts">Shorts</option></select>
+<label>Accessory</label><select id="accessory"><option value="none">None</option><option value="cape">Cape</option><option value="scarf">Scarf</option><option value="belt">Belt</option></select>
+<label>Weapon</label><select id="weapon"><option value="none">None</option><option value="sword">Sword</option><option value="staff">Magic staff</option><option value="bow">Bow</option></select>
+<button id="createCharacter" class="primary" style="width:100%;margin-top:8px">Build character</button>
+<p class="status">Susun karakter dasar dari pilihan rambut, pakaian, aksesori, dan senjata. Hasilnya tetap bisa diedit manual.</p></div>
 <div class="group"><h2>Tips</h2><p class="status">Draw with mouse or touch. Use B, E, G, I for tools. Select a layer before drawing. Use the frame strip to create animation poses. This is a lightweight editor; it does not yet create a native Godot TileSet resource.</p></div>
 </aside>
 </main><footer>Pixel Studio · All drawing stays in your browser until you export it.</footer>
@@ -81,6 +89,36 @@ function makeSwatches(){const root=document.getElementById('swatches');palette.f
 function makeTiles(){const root=document.getElementById('tiles');terrain.forEach(c=>{const b=document.createElement('button');b.className='tile';b.style.background=c;b.title=c;b.onclick=()=>{color=c;syncColor()};root.append(b)})}
 function placeholder(){snapshot();const body=document.getElementById('body').value,skin=document.getElementById('skin').value,hair=document.getElementById('hair').value;const put=(x,y,w,h,c)=>{for(let yy=y;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)setPixel(xx,yy,c)};const line=(x,y,w,c)=>put(x,y,w,1,c);put(21,43,7,10,'#263238');put(36,43,7,10,'#263238');put(22,46,5,5,hair);put(37,46,5,5,hair);put(17,24,30,22,'#263238');put(19,25,26,19,body);put(27,27,10,16,'#e9c46a');put(13,28,6,12,'#263238');put(45,28,6,12,'#263238');put(14,29,4,10,skin);put(46,29,4,10,skin);put(19,7,26,22,'#263238');put(21,9,22,18,skin);put(20,7,24,8,hair);put(18,12,5,11,hair);put(41,12,5,11,hair);put(25,18,4,3,'#263238');put(35,18,4,3,'#263238');render()};
 document.getElementById('presetChar').onclick=placeholder;
+
+function buildCharacter(){
+ snapshot();frames[frameIndex][layer].fill(0);
+ const body=document.getElementById('body').value,skin=document.getElementById('skin').value,hair=document.getElementById('hair').value;
+ const put=(x,y,w,h,c)=>{for(let yy=y;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)setPixel(xx,yy,c)};
+ const dark='#263238',gold='#e9c46a',metal='#9aa3a4';
+ const outfit=document.getElementById('outfit').value,style=document.getElementById('hairStyle').value,legs=document.getElementById('legs').value,acc=document.getElementById('accessory').value,weapon=document.getElementById('weapon').value;
+ if(acc==='cape')put(15,25,34,24,'#8d3e52');
+ put(21,43,8,12,legs==='shorts'?body:dark);put(35,43,8,12,legs==='shorts'?body:dark);
+ if(legs==='boots'){put(20,52,10,5,'#805333');put(34,52,10,5,'#805333')}
+ put(14,27,8,16,dark);put(42,27,8,16,dark);put(15,29,6,12,skin);put(43,29,6,12,skin);
+ put(19,24,26,22,dark);
+ const garment=outfit==='armor'?metal:outfit==='robe'?'#6654a0':outfit==='ranger'?'#8c633d':body;
+ put(21,25,22,19,garment);
+ if(outfit==='armor'){put(27,26,10,16,'#c4d0d8');put(21,25,4,5,gold);put(39,25,4,5,gold)}
+ if(outfit==='robe')put(23,41,18,4,'#44346f');
+ if(outfit==='ranger'){put(29,27,6,14,'#d1a15d');put(24,32,16,3,dark)}
+ if(acc==='scarf')put(21,25,22,4,'#b84e4e');
+ if(acc==='belt')put(21,39,22,3,'#805333');
+ put(28,20,8,7,skin);put(19,7,26,22,dark);put(21,9,22,18,skin);
+ if(style==='hood'){put(18,6,28,12,body);put(18,10,5,17,body);put(41,10,5,17,body)}
+ else{put(20,7,24,8,hair);if(style==='long'){put(18,12,5,18,hair);put(41,12,5,18,hair)}else if(style==='spiky'){put(21,3,5,6,hair);put(27,1,5,8,hair);put(34,3,5,6,hair);put(40,6,4,5,hair)}else{put(18,12,5,9,hair);put(41,12,5,9,hair)}}
+ put(25,18,4,3,dark);put(35,18,4,3,dark);
+ if(weapon==='sword'){put(8,19,3,25,metal);put(6,39,7,3,gold);put(7,44,5,4,'#805333')}
+ if(weapon==='staff'){put(8,10,3,44,'#805333');put(6,7,7,7,'#72d6df')}
+ if(weapon==='bow'){put(51,16,3,30,'#c99a54');put(49,16,2,30,metal);put(54,16,2,30,metal)}
+ render();drawFrames();
+}
+document.getElementById('createCharacter').onclick=buildCharacter;
+
 document.getElementById('makeTerrain').onclick=()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),cols=['#39734b','#815b3c','#285f83','#c7aa68'];for(let i=0;i<4;i++){x.fillStyle=cols[i];x.fillRect((i%2)*32,Math.floor(i/2)*32,32,32);for(let n=0;n<28;n++){x.fillStyle=i===0?'#70ad5b':'#ffffff22';x.fillRect((i%2)*32+Math.random()*32,Math.floor(i/2)*32+Math.random()*32,2,2)}}c.toBlob(b=>download(b,'terrain_preview.png'))};
 window.addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;const map={b:'pen',e:'eraser',g:'fill',i:'picker'};if(map[e.key.toLowerCase()]){tool=map[e.key.toLowerCase()];document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('active',x.dataset.tool===tool))}});
 
