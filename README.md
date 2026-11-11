@@ -45,7 +45,7 @@ python tools/pixel_generator.py all --output-dir generated --tile-size 16 --pale
 \`\`\`
 
 ## Pixel Studio GUI
-Open [Pixel Studio](tools/pixel_studio.html) directly in a browser for manual pixel drawing, color palettes, layers, animation frame preview, and PNG/JSON export.
+Open [Pixel Studio](tools/pixel_studio.html) directly in a browser for manual pixel drawing, color palettes, layers, animation frame preview, onion-skin guidance, FPS control, sprite-sheet export, and Godot 4 SpriteFrames resource export.
 
 ## Pixel Studio v2
 
