@@ -44,6 +44,19 @@ python -m pip install -r tools/requirements.txt
 python tools/pixel_generator.py all --output-dir generated --tile-size 16 --palette forest --seed 42
 \`\`\`
 
+## Pixel Studio v2
+
+The expanded generator supports customizable 64×64 characters, four-direction animation sprite sheets, and 16-mask terrain autotiles. See [Pixel Studio v2 Guide](docs/PIXEL_STUDIO_V2.md).
+
+Quick examples:
+
+```bash
+python -m pip install -r tools/requirements.txt
+python tools/pixel_studio.py character --hair blonde --hair-style spiky --outfit armor
+python tools/pixel_studio.py animation --frames 4
+python tools/pixel_studio.py autotile --tile-size 16 --palette forest
+```
+
 ## Documentation
 - [Game Design](docs/GAME_DESIGN.md)
 - [Development Roadmap](docs/ROADMAP.md)
