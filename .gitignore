@@ -1,0 +1,23 @@
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Temporary and generated files
+.tmp/
+temp/
+.cache/
+*.log
+
+# Build output
+build/
+dist/
+export/
+exports/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
