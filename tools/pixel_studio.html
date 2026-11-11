@@ -22,7 +22,7 @@ footer{padding:0 18px 20px;color:var(--muted);text-align:center;font-size:12px}
 @media(max-width:620px){.wrap{grid-template-columns:1fr;padding:8px}.right{grid-column:auto;display:block}.canvasbox{min-height:360px;padding:8px}#art{width:min(88vw,512px)}header{position:static}}
 </style></head>
 <body>
-<header><div style="font-size:25px">▦</div><div><h1>Pixel Studio</h1><small>Pixel RPG 64x64 · Browser Edition</small></div><span style="margin-left:auto;color:var(--accent)">v1.0</span></header>
+<header><div style="font-size:25px">▦</div><div><h1>Pixel Studio</h1><small>Pixel RPG 64x64 · Modular Character Edition</small></div><span style="margin-left:auto;color:var(--accent)">v2.2</span></header>
 <main class="wrap">
 <aside class="panel">
 <h2>Tools</h2>
@@ -32,7 +32,7 @@ footer{padding:0 18px 20px;color:var(--muted);text-align:center;font-size:12px}
 </div>
 <div class="group"><label>Canvas preset</label><select id="preset"><option value="64">Character · 64×64</option><option value="32">Tile · 32×32</option><option value="16">Tile · 16×16</option></select><label>Grid overlay</label><input id="grid" type="checkbox" checked></div>
 <div class="group"><h2>Color</h2><div class="row"><input id="color" type="color" value="#4f9b68"><span id="hex">#4f9b68</span></div><label>Palette</label><div class="swatches" id="swatches"></div></div>
-<div class="group"><h2>Layers</h2><select id="layer"><option value="0">Layer 1 · Base</option><option value="1">Layer 2 · Details</option></select><div class="row" style="margin-top:7px"><button id="clear">Clear layer</button><button id="undo">Undo</button></div></div>
+<div class="group"><h2>Layers</h2><select id="layer"><option value="0">Body & Legs</option><option value="1">Clothing & Armor</option><option value="2">Head & Face</option><option value="3">Hair</option><option value="4">Accessories</option><option value="5">Weapon</option><option value="6">Details</option></select><div class="row" style="margin-top:7px"><button id="clear">Clear layer</button><button id="undo">Undo</button></div></div>
 <div class="group"><h2>Export</h2><button class="primary" id="export" style="width:100%">Download PNG</button><button id="json" style="width:100%;margin-top:6px">Export project JSON</button><label>File name</label><input id="filename" value="pixel_asset" style="width:100%"></div>
 </aside>
 <section class="center">
@@ -50,16 +50,17 @@ footer{padding:0 18px 20px;color:var(--muted);text-align:center;font-size:12px}
 <label>Weapon</label><select id="weapon"><option value="none">None</option><option value="sword">Sword</option><option value="staff">Magic staff</option><option value="bow">Bow</option></select>
 <button id="createCharacter" class="primary" style="width:100%;margin-top:8px">Build character</button>
 <p class="status">Susun karakter dasar dari pilihan rambut, pakaian, aksesori, dan senjata. Hasilnya tetap bisa diedit manual.</p></div>
-<div class="group"><h2>Tips</h2><p class="status">Draw with mouse or touch. Use B, E, G, I for tools. Select a layer before drawing. Use the frame strip to create animation poses. This is a lightweight editor; it does not yet create a native Godot TileSet resource.</p></div>
+<div class="group"><h2>Tips</h2><p class="status">Draw with mouse or touch. Use B, E, G, I for tools. Select a body part layer before drawing. Use the frame strip to create animation poses. This is a lightweight editor; it does not yet create a native Godot TileSet resource.</p></div>
 </aside>
 </main><footer>Pixel Studio · All drawing stays in your browser until you export it.</footer>
 <script>
 (()=>{
 const canvas=document.getElementById('art'),ctx=canvas.getContext('2d');
-let size=64,tool='pen',color='#4f9b68',layer=0,frameIndex=0,frames=[makeFrame()],undoStack=[],drawing=false,playing=false,playTimer=null;\nlet fps=6,onionSkin=false;
+let size=64,tool='pen',color='#4f9b68',layer=0,frameIndex=0,frames=[makeFrame()],undoStack=[],drawing=false,playing=false,playTimer=null;
+let fps=6,onionSkin=false;
 const palette=['#263238','#e9b98b','#55352f','#4f9b68','#e9c46a','#39734b','#70ad5b','#285f83','#55a6b8','#c7aa68','#59636b','#9aa3a4','#ffffff','#000000'];
 const terrain=['#39734b','#815b3c','#285f83','#c7aa68','#59636b','#9b744c','#70ad5b','#55a6b8'];
-function makeFrame(){return [new Uint8ClampedArray(64*64*4),new Uint8ClampedArray(64*64*4)]}
+function makeFrame(){return Array.from({length:7},()=>new Uint8ClampedArray(64*64*4))}
 function snapshot(){undoStack.push(frames[frameIndex].map(a=>new Uint8ClampedArray(a)));if(undoStack.length>40)undoStack.shift()}
 function setPixel(x,y,c){if(x<0||y<0||x>=size||y>=size)return;const arr=frames[frameIndex][layer],i=(y*64+x)*4;if(c===null){arr.fill(0,i,i+4)}else{const n=parseInt(c.slice(1),16);arr[i]=(n>>16)&255;arr[i+1]=(n>>8)&255;arr[i+2]=n&255;arr[i+3]=255}}
 function getPixel(x,y){const a=frames[frameIndex][layer],i=(y*64+x)*4;return a[i+3]?[a[i],a[i+1],a[i+2],a[i+3]]:null}
@@ -83,7 +84,9 @@ function composite(){const out=document.createElement('canvas');out.width=out.he
 document.getElementById('export').onclick=()=>composite().toBlob(b=>download(b,(document.getElementById('filename').value||'pixel_asset')+'.png'));
 document.getElementById('json').onclick=()=>{const data={format:'pixel-studio-project',version:1,width:64,height:64,frames:frames.map(f=>f.map(a=>Array.from(a)))};download(new Blob([JSON.stringify(data)],{type:'application/json'}),(document.getElementById('filename').value||'pixel_asset')+'.json')};
 function drawFrames(){const root=document.getElementById('frames');root.innerHTML='';frames.forEach((f,i)=>{const box=document.createElement('div');box.className='frame';const c=document.createElement('canvas');c.width=c.height=64;const cx=c.getContext('2d');f.forEach(a=>{const im=cx.createImageData(64,64);im.data.set(a);cx.putImageData(im,0,0)});const b=document.createElement('button');b.textContent=(i===frameIndex?'● ':'')+(i+1);b.onclick=()=>{frameIndex=i;drawFrames();render()};box.append(c,b);root.append(box)})}
-document.getElementById('addFrame').onclick=()=>{frames.push(makeFrame());frameIndex=frames.length-1;drawFrames();render()};\ndocument.getElementById('fps').onchange=e=>{fps=Math.max(1,Math.min(24,+e.target.value||6));e.target.value=fps;if(playing){clearInterval(playTimer);playTimer=setInterval(()=>{frameIndex=(frameIndex+1)%frames.length;drawFrames();render()},1000/fps)}};\ndocument.getElementById('onion').onchange=e=>{onionSkin=e.target.checked;render()};
+document.getElementById('addFrame').onclick=()=>{frames.push(makeFrame());frameIndex=frames.length-1;drawFrames();render()};
+document.getElementById('fps').onchange=e=>{fps=Math.max(1,Math.min(24,+e.target.value||6));e.target.value=fps;if(playing){clearInterval(playTimer);playTimer=setInterval(()=>{frameIndex=(frameIndex+1)%frames.length;drawFrames();render()},1000/fps)}};
+document.getElementById('onion').onchange=e=>{onionSkin=e.target.checked;render()};
 document.getElementById('play').onclick=()=>{playing=!playing;document.getElementById('play').textContent=playing?'■ Stop':'▶ Preview';if(playing)playTimer=setInterval(()=>{frameIndex=(frameIndex+1)%frames.length;drawFrames();render()},1000/fps);else clearInterval(playTimer)};
 function makeSwatches(){const root=document.getElementById('swatches');palette.forEach(c=>{const b=document.createElement('button');b.className='swatch';b.style.background=c;b.dataset.color=c;b.title=c;b.onclick=()=>{color=c;syncColor()};root.append(b)});syncColor()}
 function makeTiles(){const root=document.getElementById('tiles');terrain.forEach(c=>{const b=document.createElement('button');b.className='tile';b.style.background=c;b.title=c;b.onclick=()=>{color=c;syncColor()};root.append(b)})}
@@ -91,31 +94,20 @@ function placeholder(){snapshot();const body=document.getElementById('body').val
 document.getElementById('presetChar').onclick=placeholder;
 
 function buildCharacter(){
- snapshot();frames[frameIndex][layer].fill(0);
+ snapshot();
  const body=document.getElementById('body').value,skin=document.getElementById('skin').value,hair=document.getElementById('hair').value;
- const put=(x,y,w,h,c)=>{for(let yy=y;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)setPixel(xx,yy,c)};
- const dark='#263238',gold='#e9c46a',metal='#9aa3a4';
  const outfit=document.getElementById('outfit').value,style=document.getElementById('hairStyle').value,legs=document.getElementById('legs').value,acc=document.getElementById('accessory').value,weapon=document.getElementById('weapon').value;
- if(acc==='cape')put(15,25,34,24,'#8d3e52');
- put(21,43,8,12,legs==='shorts'?body:dark);put(35,43,8,12,legs==='shorts'?body:dark);
- if(legs==='boots'){put(20,52,10,5,'#805333');put(34,52,10,5,'#805333')}
- put(14,27,8,16,dark);put(42,27,8,16,dark);put(15,29,6,12,skin);put(43,29,6,12,skin);
- put(19,24,26,22,dark);
- const garment=outfit==='armor'?metal:outfit==='robe'?'#6654a0':outfit==='ranger'?'#8c633d':body;
- put(21,25,22,19,garment);
- if(outfit==='armor'){put(27,26,10,16,'#c4d0d8');put(21,25,4,5,gold);put(39,25,4,5,gold)}
- if(outfit==='robe')put(23,41,18,4,'#44346f');
- if(outfit==='ranger'){put(29,27,6,14,'#d1a15d');put(24,32,16,3,dark)}
- if(acc==='scarf')put(21,25,22,4,'#b84e4e');
- if(acc==='belt')put(21,39,22,3,'#805333');
- put(28,20,8,7,skin);put(19,7,26,22,dark);put(21,9,22,18,skin);
- if(style==='hood'){put(18,6,28,12,body);put(18,10,5,17,body);put(41,10,5,17,body)}
- else{put(20,7,24,8,hair);if(style==='long'){put(18,12,5,18,hair);put(41,12,5,18,hair)}else if(style==='spiky'){put(21,3,5,6,hair);put(27,1,5,8,hair);put(34,3,5,6,hair);put(40,6,4,5,hair)}else{put(18,12,5,9,hair);put(41,12,5,9,hair)}}
- put(25,18,4,3,dark);put(35,18,4,3,dark);
- if(weapon==='sword'){put(8,19,3,25,metal);put(6,39,7,3,gold);put(7,44,5,4,'#805333')}
- if(weapon==='staff'){put(8,10,3,44,'#805333');put(6,7,7,7,'#72d6df')}
- if(weapon==='bow'){put(51,16,3,30,'#c99a54');put(49,16,2,30,metal);put(54,16,2,30,metal)}
- render();drawFrames();
+ const put=(x,y,w,h,c)=>{for(let yy=y;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)setPixel(xx,yy,c)};
+ const drawPart=(index,fn)=>{layer=index;frames[frameIndex][index].fill(0);fn()};
+ const dark='#263238',gold='#e9c46a',metal='#9aa3a4';
+ drawPart(0,()=>{put(21,43,8,12,legs==='shorts'?body:dark);put(35,43,8,12,legs==='shorts'?body:dark);if(legs==='boots'){put(20,52,10,5,'#805333');put(34,52,10,5,'#805333')}});
+ drawPart(1,()=>{put(19,24,26,22,dark);const garment=outfit==='armor'?metal:outfit==='robe'?'#6654a0':outfit==='ranger'?'#8c633d':body;put(21,25,22,19,garment);if(outfit==='armor'){put(27,26,10,16,'#c4d0d8');put(21,25,4,5,gold);put(39,25,4,5,gold)}if(outfit==='robe')put(23,41,18,4,'#44346f');if(outfit==='ranger'){put(29,27,6,14,'#d1a15d');put(24,32,16,3,dark)}});
+ drawPart(2,()=>{put(14,27,8,16,dark);put(42,27,8,16,dark);put(15,29,6,12,skin);put(43,29,6,12,skin);put(28,20,8,7,skin);put(19,7,26,22,dark);put(21,9,22,18,skin)});
+ drawPart(3,()=>{if(style==='hood'){put(18,6,28,12,body);put(18,10,5,17,body);put(41,10,5,17,body)}else{put(20,7,24,8,hair);if(style==='long'){put(18,12,5,18,hair);put(41,12,5,18,hair)}else if(style==='spiky'){put(21,3,5,6,hair);put(27,1,5,8,hair);put(34,3,5,6,hair);put(40,6,4,5,hair)}else{put(18,12,5,9,hair);put(41,12,5,9,hair)}}});
+ drawPart(4,()=>{if(acc==='cape')put(15,25,34,24,'#8d3e52');if(acc==='scarf')put(21,25,22,4,'#b84e4e');if(acc==='belt')put(21,39,22,3,'#805333')});
+ drawPart(5,()=>{if(weapon==='sword'){put(8,19,3,25,metal);put(6,39,7,3,gold);put(7,44,5,4,'#805333')}if(weapon==='staff'){put(8,10,3,44,'#805333');put(6,7,7,7,'#72d6df')}if(weapon==='bow'){put(51,16,3,30,'#c99a54');put(49,16,2,30,metal);put(54,16,2,30,metal)}});
+ drawPart(6,()=>{put(25,18,4,3,dark);put(35,18,4,3,dark)});
+ layer=+document.getElementById('layer').value;render();drawFrames();
 }
 document.getElementById('createCharacter').onclick=buildCharacter;
 
