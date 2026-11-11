@@ -34,6 +34,16 @@ A 2D fantasy RPG built with **Godot 4.x** and a consistent **64×64 px character
 ## Pixel-art rules
 64×64 px is the target character canvas, not a requirement that every tile, UI element, or background use the same dimensions. Keep pivots, scale, palette, outline treatment, and lighting consistent. Use nearest-neighbor filtering for pixel-art textures.
 
+## Pixel Generator
+A Python + Pillow procedural generator for 64×64 character placeholders and terrain tilesets. See [Pixel Generator Guide](docs/PIXEL_GENERATOR.md).
+
+Quick start:
+
+\`\`\`bash
+python -m pip install -r tools/requirements.txt
+python tools/pixel_generator.py all --output-dir generated --tile-size 16 --palette forest --seed 42
+\`\`\`
+
 ## Documentation
 - [Game Design](docs/GAME_DESIGN.md)
 - [Development Roadmap](docs/ROADMAP.md)
