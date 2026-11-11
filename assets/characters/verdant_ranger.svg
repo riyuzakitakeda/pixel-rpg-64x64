@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" shape-rendering="crispEdges">
+<title>Verdant Ranger - 64x64 pixel character</title>
+<rect width="64" height="64" fill="none"/>
+<!-- hood silhouette -->
+<path fill="#203d36" d="M20 8h24v4h4v12h-4v8H20v-8h-4V12h4z"/>
+<path fill="#3d7654" d="M20 12h24v4h4v8h-4v4H20v-4h-4v-8h4z"/>
+<path fill="#e7b98c" d="M24 16h16v12H24z"/>
+<path fill="#2b3c38" d="M23 20h4v3h-4zm14 0h4v3h-4z"/>
+<path fill="#fff0cf" d="M24 24h4v2h-4zm12 0h4v2h-4z"/>
+<path fill="#a85f4b" d="M28 27h8v2h-8z"/>
+<!-- hood trim -->
+<path fill="#d7b66b" d="M20 12h4v2h-4zm20 0h4v2h-4zM18 20h2v8h-2zm26 0h2v8h-2z"/>
+<!-- neck -->
+<path fill="#d99c72" d="M28 28h8v5h-8z"/>
+<!-- cape -->
+<path fill="#315d49" d="M19 32h26v4h4v18h-4v4H19v-4h-4V36h4z"/>
+<path fill="#234638" d="M19 38h4v16h-4zm22 0h4v16h-4z"/>
+<!-- tunic -->
+<path fill="#b9783e" d="M24 32h16v4h4v15H20V36h4z"/>
+<path fill="#e0ad5e" d="M28 34h8v3h-8z"/>
+<path fill="#65452f" d="M30 37h4v12h-4z"/>
+<path fill="#d8c17b" d="M24 40h4v3h-4zm12 0h4v3h-4z"/>
+<!-- arms -->
+<path fill="#d99c72" d="M17 36h4v12h-4zm26 0h4v12h-4z"/>
+<path fill="#315d49" d="M16 35h6v5h-6zm26 0h6v5h-6z"/>
+<!-- belt -->
+<path fill="#4b3428" d="M20 48h24v4H20z"/>
+<path fill="#e5c36d" d="M29 48h6v4h-6z"/>
+<!-- legs -->
+<path fill="#344b55" d="M22 52h8v7h-2v3h-8v-4h2zm12 0h8v7h2v3h-8v-3h-2z"/>
+<!-- boots -->
+<path fill="#65412f" d="M20 59h10v3H18v-2h2zm14 0h10v1h2v2H34z"/>
+<path fill="#d0a35d" d="M20 59h8v1h-8zm16 0h8v1h-8z"/>
+<!-- bow and quiver -->
+<path fill="#8c5a36" d="M48 28h3v25h-3z"/>
+<path fill="#d7b66b" d="M47 27h5v2h-5zm0 25h5v2h-5z"/>
+<path fill="#c5d6c7" d="M50 30h1v21h-1z"/>
+<!-- shoulder badge -->
+<path fill="#d7b66b" d="M20 34h4v4h-4z"/>
+<path fill="#6fa36d" d="M21 35h2v2h-2z"/>
+</svg>
