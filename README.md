@@ -44,6 +44,9 @@ python -m pip install -r tools/requirements.txt
 python tools/pixel_generator.py all --output-dir generated --tile-size 16 --palette forest --seed 42
 \`\`\`
 
+## Pixel Studio GUI
+Open [Pixel Studio](tools/pixel_studio.html) directly in a browser for manual pixel drawing, color palettes, layers, animation frame preview, and PNG/JSON export.
+
 ## Pixel Studio v2
 
 The expanded generator supports customizable 64×64 characters, four-direction animation sprite sheets, and 16-mask terrain autotiles. See [Pixel Studio v2 Guide](docs/PIXEL_STUDIO_V2.md).
