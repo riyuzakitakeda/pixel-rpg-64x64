@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pixel Studio — Pixel RPG 64x64</title>
+<style>
+:root{color-scheme:dark;--bg:#11151c;--panel:#1b222d;--panel2:#242e3b;--line:#344253;--text:#e9f0f7;--muted:#9eacbb;--accent:#75d6b0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui,Segoe UI,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);background:#171e27;position:sticky;top:0;z-index:2}
+h1{font-size:18px;margin:0}header small{color:var(--muted)}.wrap{display:grid;grid-template-columns:230px minmax(300px,1fr) 260px;gap:14px;padding:14px;max-width:1500px;margin:auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px;min-width:0}.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px}
+.group{margin-bottom:17px}.row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}button,select,input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px;font:inherit}button{cursor:pointer}button:hover,button.active{border-color:var(--accent);color:var(--accent)}button.primary{background:#285d4c;border-color:#398568;color:white}button:disabled{opacity:.4;cursor:not-allowed}
+label{display:block;color:var(--muted);font-size:12px;margin:8px 0 5px}input[type=color]{width:40px;height:34px;padding:2px}input[type=range]{width:100%}input[type=number]{width:72px}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tools button{font-size:12px}
+.center{display:flex;flex-direction:column;gap:12px}.canvasbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;justify-content:center;align-items:center;min-height:540px;overflow:auto}
+#art{width:min( min(70vw,512px),100%);height:auto;image-rendering:pixelated;touch-action:none;background-color:#202833;background-image:linear-gradient(45deg,#293340 25%,transparent 25%),linear-gradient(-45deg,#293340 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#293340 75%),linear-gradient(-45deg,transparent 75%,#293340 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;border:1px solid #647487;cursor:crosshair}
+.status{color:var(--muted);font-size:12px}.swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.swatch{height:29px;border:2px solid #ffffff20;border-radius:6px;cursor:pointer}.swatch.selected{outline:2px solid var(--accent);outline-offset:2px}
+.frames{display:flex;gap:7px;overflow:auto;padding:4px}.frame{width:66px;flex:none;text-align:center}.frame canvas{width:64px;height:64px;image-rendering:pixelated;border:1px solid var(--line);background:#28313d}.frame button{width:100%;padding:4px;margin-top:3px;font-size:11px}
+#tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.tile{width:100%;aspect-ratio:1;image-rendering:pixelated;border:1px solid var(--line);background:#28313d}
+footer{padding:0 18px 20px;color:var(--muted);text-align:center;font-size:12px}
+@media(max-width:950px){.wrap{grid-template-columns:190px minmax(260px,1fr)}.right{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px}}
+@media(max-width:620px){.wrap{grid-template-columns:1fr;padding:8px}.right{grid-column:auto;display:block}.canvasbox{min-height:360px;padding:8px}#art{width:min(88vw,512px)}header{position:static}}
+</style></head>
+<body>
+<header><div style="font-size:25px">▦</div><div><h1>Pixel Studio</h1><small>Pixel RPG 64x64 · Browser Edition</small></div><span style="margin-left:auto;color:var(--accent)">v1.0</span></header>
+<main class="wrap">
+<aside class="panel">
+<h2>Tools</h2>
+<div class="group tools">
+<button class="active" data-tool="pen">✎ Pen (B)</button><button data-tool="eraser">▱ Eraser (E)</button>
+<button data-tool="fill">▨ Fill (G)</button><button data-tool="picker">⌖ Picker (I)</button>
+</div>
+<div class="group"><label>Canvas preset</label><select id="preset"><option value="64">Character · 64×64</option><option value="32">Tile · 32×32</option><option value="16">Tile · 16×16</option></select><label>Grid overlay</label><input id="grid" type="checkbox" checked></div>
+<div class="group"><h2>Color</h2><div class="row"><input id="color" type="color" value="#4f9b68"><span id="hex">#4f9b68</span></div><label>Palette</label><div class="swatches" id="swatches"></div></div>
+<div class="group"><h2>Layers</h2><select id="layer"><option value="0">Layer 1 · Base</option><option value="1">Layer 2 · Details</option></select><div class="row" style="margin-top:7px"><button id="clear">Clear layer</button><button id="undo">Undo</button></div></div>
+<div class="group"><h2>Export</h2><button class="primary" id="export" style="width:100%">Download PNG</button><button id="json" style="width:100%;margin-top:6px">Export project JSON</button><label>File name</label><input id="filename" value="pixel_asset" style="width:100%"></div>
+</aside>
+<section class="center">
+<div class="canvasbox"><canvas id="art" width="64" height="64"></canvas></div>
+<div class="panel"><div class="row" style="justify-content:space-between"><strong>Animation frames</strong><div class="row"><button id="addFrame">＋ Frame</button><button id="play">▶ Preview</button></div></div><div class="frames" id="frames"></div><div class="status">Each frame is independent. Export the current frame as PNG; project JSON stores all frames.</div></div>
+</section>
+<aside class="panel right">
+<div class="group"><h2>Tileset palette</h2><p class="status">Quick terrain swatches for painting tiles.</p><div id="tiles"></div><button id="makeTerrain" style="width:100%;margin-top:8px">Generate terrain sheet</button></div>
+<div class="group"><h2>Character presets</h2><label>Body color</label><select id="body"><option value="#4f9b68">Forest green</option><option value="#477fae">Blue</option><option value="#ad514b">Red</option><option value="#7960a5">Purple</option><option value="#b68b3c">Gold</option></select><label>Skin</label><select id="skin"><option value="#f0c7a0">Light</option><option value="#c98f68">Tan</option><option value="#86583f">Dark</option></select><label>Hair</label><select id="hair"><option value="#55352f">Brown</option><option value="#29252b">Black</option><option value="#d6ae55">Blonde</option><option value="#a84c36">Red</option><option value="#456c9b">Blue</option></select><button id="presetChar" class="primary" style="width:100%;margin-top:8px">Create placeholder</button></div>
+<div class="group"><h2>Tips</h2><p class="status">Draw with mouse or touch. Use B, E, G, I for tools. Select a layer before drawing. Use the frame strip to create animation poses. This is a lightweight editor; it does not yet create a native Godot TileSet resource.</p></div>
+</aside>
+</main><footer>Pixel Studio · All drawing stays in your browser until you export it.</footer>
+<script>
+(()=>{
+const canvas=document.getElementById('art'),ctx=canvas.getContext('2d');
+let size=64,tool='pen',color='#4f9b68',layer=0,frameIndex=0,frames=[makeFrame()],undoStack=[],drawing=false,playing=false,playTimer=null;
+const palette=['#263238','#e9b98b','#55352f','#4f9b68','#e9c46a','#39734b','#70ad5b','#285f83','#55a6b8','#c7aa68','#59636b','#9aa3a4','#ffffff','#000000'];
+const terrain=['#39734b','#815b3c','#285f83','#c7aa68','#59636b','#9b744c','#70ad5b','#55a6b8'];
+function makeFrame(){return [new Uint8ClampedArray(64*64*4),new Uint8ClampedArray(64*64*4)]}
+function snapshot(){undoStack.push(frames[frameIndex].map(a=>new Uint8ClampedArray(a)));if(undoStack.length>40)undoStack.shift()}
+function setPixel(x,y,c){if(x<0||y<0||x>=size||y>=size)return;const arr=frames[frameIndex][layer],i=(y*64+x)*4;if(c===null){arr.fill(0,i,i+4)}else{const n=parseInt(c.slice(1),16);arr[i]=(n>>16)&255;arr[i+1]=(n>>8)&255;arr[i+2]=n&255;arr[i+3]=255}}
+function getPixel(x,y){const a=frames[frameIndex][layer],i=(y*64+x)*4;return a[i+3]?[a[i],a[i+1],a[i+2],a[i+3]]:null}
+function render(){ctx.clearRect(0,0,64,64);for(const arr of frames[frameIndex]){const im=ctx.createImageData(64,64);im.data.set(arr);ctx.putImageData(im,0,0)}if(document.getElementById('grid').checked){ctx.save();ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=.04;const step=size===64?8:size===32?4:2;for(let p=0;p<=64;p+=step){ctx.beginPath();ctx.moveTo(p,0);ctx.lineTo(p,64);ctx.stroke();ctx.beginPath();ctx.moveTo(0,p);ctx.lineTo(64,p);ctx.stroke()}ctx.restore()}}
+function coords(e){const r=canvas.getBoundingClientRect();return [Math.floor((e.clientX-r.left)/r.width*64),Math.floor((e.clientY-r.top)/r.height*64)]}
+function flood(x,y){const target=getPixel(x,y),replacement=color;if(target&&target[0]===parseInt(color.slice(1,3),16)&&target[1]===parseInt(color.slice(3,5),16)&&target[2]===parseInt(color.slice(5,7),16))return;const q=[[x,y]],seen=new Set();snapshot();while(q.length){const [a,b]=q.pop(),k=b*64+a;if(a<0||b<0||a>=size||b>=size||seen.has(k))continue;seen.add(k);const v=getPixel(a,b);if((!target&&!v)||(target&&v&&target.every((n,i)=>n===v[i]))) {setPixel(a,b,replacement);q.push([a+1,b],[a-1,b],[a,b+1],[a,b-1])}}render()}
+function paint(e){const [x,y]=coords(e);if(tool==='picker'){const p=getPixel(x,y);if(p){color='#'+p.slice(0,3).map(v=>v.toString(16).padStart(2,'0')).join('');syncColor()}return}if(tool==='fill'){flood(x,y);return}setPixel(x,y,tool==='eraser'?null:color);render()}
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture(e.pointerId);drawing=true;if(tool!=='fill'&&tool!=='picker')snapshot();paint(e)});
+canvas.addEventListener('pointermove',e=>{if(drawing&&tool!=='fill'&&tool!=='picker')paint(e)});
+canvas.addEventListener('pointerup',()=>drawing=false);canvas.addEventListener('pointercancel',()=>drawing=false);
+function syncColor(){document.getElementById('color').value=color;document.getElementById('hex').textContent=color;document.querySelectorAll('.swatch').forEach(s=>s.classList.toggle('selected',s.dataset.color===color))}
+document.getElementById('color').oninput=e=>{color=e.target.value;syncColor()};
+document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{tool=b.dataset.tool;document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('active',x===b))});
+document.getElementById('grid').onchange=render;
+document.getElementById('layer').onchange=e=>layer=+e.target.value;
+document.getElementById('preset').onchange=e=>{size=+e.target.value;render()};
+document.getElementById('clear').onclick=()=>{snapshot();frames[frameIndex][layer].fill(0);render()};
+document.getElementById('undo').onclick=()=>{if(undoStack.length){frames[frameIndex]=undoStack.pop();render()}};
+function download(blob,name){const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function composite(){const out=document.createElement('canvas');out.width=out.height=64;const c=out.getContext('2d');for(const arr of frames[frameIndex]){const im=c.createImageData(64,64);im.data.set(arr);c.putImageData(im,0,0)}return out}
+document.getElementById('export').onclick=()=>composite().toBlob(b=>download(b,(document.getElementById('filename').value||'pixel_asset')+'.png'));
+document.getElementById('json').onclick=()=>{const data={format:'pixel-studio-project',version:1,width:64,height:64,frames:frames.map(f=>f.map(a=>Array.from(a)))};download(new Blob([JSON.stringify(data)],{type:'application/json'}),(document.getElementById('filename').value||'pixel_asset')+'.json')};
+function drawFrames(){const root=document.getElementById('frames');root.innerHTML='';frames.forEach((f,i)=>{const box=document.createElement('div');box.className='frame';const c=document.createElement('canvas');c.width=c.height=64;const cx=c.getContext('2d');f.forEach(a=>{const im=cx.createImageData(64,64);im.data.set(a);cx.putImageData(im,0,0)});const b=document.createElement('button');b.textContent=(i===frameIndex?'● ':'')+(i+1);b.onclick=()=>{frameIndex=i;drawFrames();render()};box.append(c,b);root.append(box)})}
+document.getElementById('addFrame').onclick=()=>{frames.push(makeFrame());frameIndex=frames.length-1;drawFrames();render()};
+document.getElementById('play').onclick=()=>{playing=!playing;document.getElementById('play').textContent=playing?'■ Stop':'▶ Preview';if(playing)playTimer=setInterval(()=>{frameIndex=(frameIndex+1)%frames.length;drawFrames();render()},180);else clearInterval(playTimer)};
+function makeSwatches(){const root=document.getElementById('swatches');palette.forEach(c=>{const b=document.createElement('button');b.className='swatch';b.style.background=c;b.dataset.color=c;b.title=c;b.onclick=()=>{color=c;syncColor()};root.append(b)});syncColor()}
+function makeTiles(){const root=document.getElementById('tiles');terrain.forEach(c=>{const b=document.createElement('button');b.className='tile';b.style.background=c;b.title=c;b.onclick=()=>{color=c;syncColor()};root.append(b)})}
+function placeholder(){snapshot();const body=document.getElementById('body').value,skin=document.getElementById('skin').value,hair=document.getElementById('hair').value;const put=(x,y,w,h,c)=>{for(let yy=y;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)setPixel(xx,yy,c)};const line=(x,y,w,c)=>put(x,y,w,1,c);put(21,43,7,10,'#263238');put(36,43,7,10,'#263238');put(22,46,5,5,hair);put(37,46,5,5,hair);put(17,24,30,22,'#263238');put(19,25,26,19,body);put(27,27,10,16,'#e9c46a');put(13,28,6,12,'#263238');put(45,28,6,12,'#263238');put(14,29,4,10,skin);put(46,29,4,10,skin);put(19,7,26,22,'#263238');put(21,9,22,18,skin);put(20,7,24,8,hair);put(18,12,5,11,hair);put(41,12,5,11,hair);put(25,18,4,3,'#263238');put(35,18,4,3,'#263238');render()};
+document.getElementById('presetChar').onclick=placeholder;
+document.getElementById('makeTerrain').onclick=()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),cols=['#39734b','#815b3c','#285f83','#c7aa68'];for(let i=0;i<4;i++){x.fillStyle=cols[i];x.fillRect((i%2)*32,Math.floor(i/2)*32,32,32);for(let n=0;n<28;n++){x.fillStyle=i===0?'#70ad5b':'#ffffff22';x.fillRect((i%2)*32+Math.random()*32,Math.floor(i/2)*32+Math.random()*32,2,2)}}download(new Promise(resolve=>c.toBlob(resolve)),'terrain_preview.png')};
+window.addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;const map={b:'pen',e:'eraser',g:'fill',i:'picker'};if(map[e.key.toLowerCase()]){tool=map[e.key.toLowerCase()];document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('active',x.dataset.tool===tool))}});
+makeSwatches();makeTiles();drawFrames();render();
+})();
+</script></body></html>
