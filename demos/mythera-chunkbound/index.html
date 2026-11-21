@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#091525">
+<title>Mythera — Chunkbound</title>
+<style>
+:root{color-scheme:dark;--bg:#091525;--panel:#101f32ee;--line:#55718c66;--text:#eaf4ff;--muted:#a9bed1;--cyan:#68dfff;--gold:#e9c982}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px system-ui,Segoe UI,sans-serif}canvas{display:block}#view{position:fixed;inset:0}.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;backdrop-filter:blur(10px);box-shadow:0 12px 35px #0006}
+#brand{position:absolute;top:14px;left:14px;padding:11px 15px;pointer-events:none}#brand b{font: bold 20px Georgia;letter-spacing:.16em;color:#f2e7c8}#brand small{display:block;font-size:9px;letter-spacing:.18em;color:var(--muted)}
+#party{position:absolute;right:14px;top:14px;width:210px;padding:12px}.member{padding:7px 0;border-bottom:1px solid #ffffff18}.member:last-child{border:0}.member b{font-size:12px}.member small{display:block;color:var(--muted);font-size:10px}
+#status{position:absolute;left:14px;bottom:14px;width:270px;padding:12px}.line{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.line b{color:var(--text)}.bar{height:7px;border-radius:10px;background:#2a3a4c;margin:7px 0 9px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#32b8df,#8be9ff);width:100%}
+#help{position:absolute;right:14px;bottom:14px;padding:10px 13px;color:var(--muted);font-size:11px;line-height:1.8}kbd{padding:1px 5px;border:1px solid #8298ae66;border-radius:4px;color:#fff}
+#map{position:absolute;right:14px;top:158px;width:140px;height:105px;border:1px solid var(--line);border-radius:9px;background:#091827dd}
+#toast{position:absolute;top:18px;left:50%;transform:translateX(-50%);padding:9px 14px;opacity:0;transition:opacity .2s;font-size:12px;pointer-events:none}
+#battle{display:none;position:absolute;inset:0;background:#030a16b8;align-items:center;justify-content:center;padding:14px}#battle.show{display:flex}#battlebox{width:min(720px,100%);padding:18px}
+h2{font:24px Georgia;margin:0;color:var(--gold)}#battlehead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}#battlehead small{color:var(--muted)}
+#units{display:grid;grid-template-columns:1fr 1fr;gap:10px}.unit{background:#14243a;border:1px solid var(--line);border-radius:10px;padding:12px}.unit h3{font-size:14px;margin:0 0 8px}.unit p{font-size:11px;color:var(--muted);margin:5px 0}.hp{height:8px;border-radius:10px;background:#334153;overflow:hidden}.hp i{display:block;height:100%;background:#55d6a6}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}button{cursor:pointer;border:1px solid #6396b8;background:linear-gradient(#285578,#18344e);color:white;border-radius:8px;padding:10px 13px;font-weight:700}button:disabled{opacity:.35;cursor:not-allowed}button:hover{filter:brightness(1.2)}#log{margin-top:12px;min-height:48px;background:#091626;border-radius:8px;padding:10px;color:#d2e5f6;font-size:12px;line-height:1.5}#retreat{margin-left:auto;background:#422d39;border-color:#9d6875}
+#hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-size:11px;color:white;text-shadow:0 2px 5px #000;white-space:nowrap}
+@media(max-width:620px){#party{width:160px;right:10px;top:10px;padding:8px}#brand{left:10px;top:10px}#help{display:none}#map{top:143px;right:10px;width:110px;height:83px}#status{left:10px;bottom:10px;width:230px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="view"></div>
+<div id="brand" class="panel"><b>MYTHERA</b><small>CHUNKBOUND · 3D TURN-BASED RPG PROTOTYPE</small></div>
+<div id="party" class="panel"><div style="font:15px Georgia;color:var(--gold)">EXPEDITION PARTY</div>
+<div class="member"><b>Elara Ashford</b><small>Aether Adept · HP <span id="elaraHp">100</span>/100</small></div>
+<div class="member"><b>Jax Ashford</b><small>Heavy Vanguard · HP 120/120</small></div>
+<div class="member"><b>AI-01</b><small>Guardian Golem · HP 180/180</small></div></div>
+<canvas id="map" width="280" height="210"></canvas>
+<div id="status" class="panel"><div class="line"><b>ELARA</b><span>Aether <b id="ap">40</b>/40</span></div><div class="bar"><i id="worldHp"></i></div><div class="line"><span>Chunk <b id="chunk">0, 0</b></span><span id="biome">Emerald Reach</span></div></div>
+<div id="help" class="panel"><b style="color:white">EXPLORATION</b><br><kbd>W A S D</kbd> move · <kbd>Shift</kbd> sprint<br><kbd>E</kbd> interact / gather<br><kbd>Space</kbd> dodge · <kbd>R</kbd> reset position<br><span style="color:var(--cyan)">Approach a red sentinel to battle.</span></div>
+<div id="toast" class="panel"></div><div id="hint">Explore the frontier · chunks generate as you travel</div>
+<div id="battle"><div id="battlebox" class="panel">
+<div id="battlehead"><div><h2>Ruin Sentinel</h2><small>Ancient defense construct · Turn-based encounter</small></div><b id="turn">PLAYER TURN</b></div>
+<div id="units">
+<div class="unit"><h3>Expedition Party</h3><p>Elara · <span id="battleElara">100</span>/100 HP</p><div class="hp"><i id="partyBar" style="width:100%"></i></div><p>Jax and AI-01 support the party.</p></div>
+<div class="unit"><h3>Ruin Sentinel</h3><p>HP <span id="enemyHp">150</span>/150</p><div class="hp"><i id="enemyBar" style="width:100%;background:linear-gradient(90deg,#e56b75,#ffb17b)"></i></div><p id="enemyState">Defense protocol active</p></div>
+</div>
+<div class="actions"><button id="attack">Basic Attack</button><button id="skill">Aether Bolt · 10 AP</button><button id="guard">Guard</button><button id="potion">Use Potion</button><button id="retreat">Retreat</button></div>
+<div id="log">The sentinel detects your party. Choose an action.</div></div></div>
+<script type="module">
+import * as THREE from 'three';
+
+const root=document.querySelector('#view');
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x91b9cf); scene.fog=new THREE.Fog(0x91b9cf,28,78);
+const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,150); camera.position.set(9,12,15);
+const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,1.7)); renderer.setSize(innerWidth,innerHeight); renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; root.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xdceeff,0x506247,2.0));
+const sun=new THREE.DirectionalLight(0xffedcf,2.4);sun.position.set(-12,20,9);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
+const mat=(c,r=.9,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+const mats={grass:mat(0x4b8158),grass2:mat(0x5b9360),earth:mat(0x786b50),stone:mat(0x82908a),moss:mat(0x426d4c),trunk:mat(0x594432),leaf:mat(0x2e6948),crystal:mat(0x45d7f1,.28,.25),gold:mat(0xd6b56b,.35,.55),white:mat(0xe5e8e1,.45,.35),blue:mat(0x315c9b,.35,.35),red:mat(0x9c3842,.5,.25),dark:mat(0x202a39)};
+const groundGeo=new THREE.BoxGeometry(1,.45,1);
+const world=new THREE.Group();scene.add(world);
+const chunkSize=16, visibleRadius=2, chunks=new Map(), obstacles=[], enemies=[], landmarks=[];
+let player={x:0,z:0,hp:100,ap:40,potions:2,guard:false,busy:false};
+const hero=new THREE.Group();scene.add(hero);
+function box(parent,w,h,d,material,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+function makeHero(){
+ const g=new THREE.Group();
+ box(g,.72,.9,.52,mats.blue,0,1.05,0);box(g,.55,.48,.54,mats.white,0,1.63,0);box(g,.55,.18,.55,mats.gold,0,1.25,0);
+ box(g,.47,.47,.46,mat(0xcac8df),0,2.13,0);box(g,.5,.16,.5,mats.dark,0,2.38,0);
+ box(g,.16,.12,.08,mats.crystal,.17,2.15,-.24);
+ box(g,.18,.72,.2,mats.white,-.5,1.2,0);box(g,.18,.72,.2,mats.white,.5,1.2,0);
+ box(g,.23,.75,.25,mats.dark,-.22,.38,0);box(g,.23,.75,.25,mats.dark,.22,.38,0);
+ box(g,.34,.09,.28,mats.gold,-.22,.04,0);box(g,.34,.09,.28,mats.gold,.22,.04,0);
+ // silver hair cap
+ box(g,.62,.18,.57,mat(0xbab9d7),0,2.39,.02);
+ const core=new THREE.Mesh(new THREE.OctahedronGeometry(.19),mats.crystal);core.position.set(0,1.62,-.29);g.add(core);
+ return g;
+}
+hero.add(makeHero());hero.position.set(0,0,0);
+function seeded(a,b){let n=Math.sin(a*127.1+b*311.7+71.3)*43758.5453;return n-Math.floor(n)}
+function addTree(group,x,z,s=1){const t=new THREE.Group();t.position.set(x,0,z);box(t,.28*s,1.4*s,.28*s,mats.trunk,0,.7*s,0);for(let i=0;i<3;i++){const cone=new THREE.Mesh(new THREE.ConeGeometry(.9*s-i*.12,1.5*s,6),i===1?mats.grass2:mats.leaf);cone.position.set(0,1.5*s+i*.45*s,0);cone.castShadow=true;t.add(cone)}group.add(t);obstacles.push({x,z,r:.62*s})}
+function addRock(group,x,z,s=1){const r=new THREE.Mesh(new THREE.DodecahedronGeometry(.55*s,0),mats.stone);r.position.set(x,.38*s,z);r.scale.y=.8;r.castShadow=true;r.receiveShadow=true;group.add(r);obstacles.push({x,z,r:.55*s})}
+function addCrystal(group,x,z){const c=new THREE.Mesh(new THREE.OctahedronGeometry(.48),mats.crystal);c.position.set(x,.75,z);c.rotation.z=.2;c.castShadow=true;group.add(c);const glow=new THREE.PointLight(0x38cfff,.55,3);glow.position.set(x,1,z);group.add(glow)}
+function addSentinel(group,x,z,key){const e=new THREE.Group();e.position.set(x,0,z);
+ box(e,.78,1.1,.65,mats.dark,0,1.05,0);box(e,.95,.48,.72,mats.red,0,1.75,0);box(e,.52,.4,.52,mats.stone,0,2.17,0);box(e,.4,.12,.1,mats.crystal,0,2.18,-.28);
+ box(e,.28,.95,.32,mats.stone,-.66,1.35,0);box(e,.28,.95,.32,mats.stone,.66,1.35,0);box(e,.34,.72,.35,mats.dark,-.25,.38,0);box(e,.34,.72,.35,mats.dark,.25,.38,0);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(.85,.055,6,24),mats.gold);ring.rotation.x=Math.PI/2;ring.position.y=.12;e.add(ring);
+ group.add(e);enemies.push({mesh:e,x:x,z:z,hp:150,max:150,key,active:true});
+}
+function chunkKey(cx,cz){return cx+','+cz}
+function makeChunk(cx,cz){
+ const key=chunkKey(cx,cz);if(chunks.has(key))return;
+ const g=new THREE.Group();g.position.set(cx*chunkSize,0,cz*chunkSize);world.add(g);
+ const floor=new THREE.Mesh(groundGeo,new THREE.MeshStandardMaterial({color:seeded(cx,cz)>.5?0x4c8059:0x56865e}));floor.scale.set(chunkSize,.15,chunkSize);floor.position.set(chunkSize/2,-.25,chunkSize/2);floor.receiveShadow=true;g.add(floor);
+ for(let i=0;i<18;i++){const x=1+seeded(cx*13+i,cz*9)*14,z=1+seeded(cx*7,cz*17+i)*14,v=seeded(cx+i,cz-i);if(v<.42)addTree(g,x,z,.7+v*.8);else if(v<.62)addRock(g,x,z,.7+v);else if(v<.76)addCrystal(g,x,z)}
+ // ancient ruin fragments
+ if(seeded(cx+44,cz-18)>.45){for(let k=0;k<3;k++){box(g,.45,2.7,.45,mats.stone,4+k*1.5,1.35,11);box(g,.7,.25,.65,mats.gold,4+k*1.5,2.8,11)}}
+ if(seeded(cx*4+3,cz*5+8)>.38){const ex=3+seeded(cx+8,cz+9)*10,ez=3+seeded(cx+12,cz+2)*10;addSentinel(g,ex,ez,key)}
+ chunks.set(key,g);
+}
+function updateChunks(){const cx=Math.floor(player.x/chunkSize),cz=Math.floor(player.z/chunkSize);for(let x=cx-visibleRadius;x<=cx+visibleRadius;x++)for(let z=cz-visibleRadius;z<=cz+visibleRadius;z++)makeChunk(x,z);
+ for(const [k,g] of chunks){const [x,z]=k.split(',').map(Number);if(Math.abs(x-cx)>visibleRadius+1||Math.abs(z-cz)>visibleRadius+1){world.remove(g);g.traverse(o=>{if(o.geometry)o.geometry.dispose()});chunks.delete(k)}}
+ document.querySelector('#chunk').textContent=cx+', '+cz;document.querySelector('#biome').textContent=(cx+cz)%3===0?'Ancient Verge':'Emerald Reach';drawMap();}
+function drawMap(){const c=document.querySelector('#map'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#18334a';ctx.fillRect(0,0,c.width,c.height);for(const [key] of chunks){const [x,z]=key.split(',').map(Number),cx=c.width/2+(x-Math.floor(player.x/16))*25,cy=c.height/2+(z-Math.floor(player.z/16))*25;ctx.fillStyle='#477d5a';ctx.fillRect(cx-12,cy-12,23,23)}ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(c.width/2,c.height/2,5,0,7);ctx.fill();ctx.fillStyle='#f16d72';for(const e of enemies)if(e.active){const dx=(e.x+Math.floor(e.mesh.parent.position.x/16)*16-player.x)*4,dy=(e.z+Math.floor(e.mesh.parent.position.z/16)*16-player.z)*4;ctx.fillRect(c.width/2+dx-2,c.height/2+dy-2,5,5)}}
+function collides(x,z){for(const o of obstacles){if(Math.hypot(x-o.x,z-o.z)<o.r+.38)return true}return false}
+function nearestEnemy(){let best=null,dist=2.8;for(const e of enemies){if(!e.active)continue;const ex=e.x+e.mesh.parent.position.x,ez=e.z+e.mesh.parent.position.z,d=Math.hypot(player.x-ex,player.z-ez);if(d<dist){dist=d;best=e}}return best}
+let keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase()))e.preventDefault();if(e.key.toLowerCase()==='e')interact();if(e.key.toLowerCase()==='r'){player.x=0;player.z=0;updateChunks();toast('Kembali ke camp awal.')}});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+let last=performance.now(),toastTimer;function toast(t){const el=document.querySelector('#toast');el.textContent=t;el.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.opacity=0,1900)}
+function interact(){const e=nearestEnemy();if(e){startBattle(e);return}player.ap=Math.min(40,player.ap+5);document.querySelector('#ap').textContent=player.ap;toast('Kamu mengumpulkan residu Aether: +5 AP.')}
+let battle={active:false,enemy:null,enemyHp:150,guard:false,turn:false};
+function startBattle(e){battle.active=true;battle.enemy=e;battle.enemyHp=e.hp;document.querySelector('#battle').classList.add('show');document.querySelector('#hint').style.display='none';document.querySelector('#log').textContent='Ruin Sentinel mengunci target. Giliran party!';updateBattle();toast('Battle dimulai!')}
+function updateBattle(){document.querySelector('#enemyHp').textContent=battle.enemyHp;document.querySelector('#enemyBar').style.width=(battle.enemyHp/150*100)+'%';document.querySelector('#battleElara').textContent=player.hp;document.querySelector('#partyBar').style.width=player.hp+'%';document.querySelector('#elaraHp').textContent=player.hp;document.querySelector('#ap').textContent=player.ap;document.querySelector('#b').textContent='';document.querySelectorAll('#battle button:not(#retreat)').forEach(b=>b.disabled=battle.turn||!battle.active)}
+function endTurn(){if(battle.enemyHp<=0){battle.enemy.active=false;world.remove(battle.enemy.mesh.parent);document.querySelector('#log').textContent='Sentinel tumbang. Jalur reruntuhan kini aman. +20 XP';closeBattle();return}battle.turn=true;updateBattle();document.querySelector('#turn').textContent='ENEMY TURN';setTimeout(()=>{const dmg=battle.guard?7:15;player.hp=Math.max(0,player.hp-dmg);battle.guard=false;document.querySelector('#log').textContent='Ruin Sentinel menyerang! Elara menerima '+dmg+' damage.';battle.turn=false;document.querySelector('#turn').textContent='PLAYER TURN';if(player.hp<=0){document.querySelector('#log').textContent='Party mundur setelah Elara tumbang. HP dipulihkan sebagian.';player.hp=55}updateBattle()},650)}
+function act(type){if(!battle.active||battle.turn)return;let dmg=0;if(type==='attack'){dmg=22+Math.floor(Math.random()*9);document.querySelector('#log').textContent='Jax menerjang dengan greatsword! Sentinel menerima '+dmg+' damage.'}if(type==='skill'){if(player.ap<10){document.querySelector('#log').textContent='Aether tidak cukup!';return}player.ap-=10;dmg=39+Math.floor(Math.random()*10);document.querySelector('#log').textContent='Elara meluncurkan Aether Bolt! '+dmg+' damage.'}if(type==='guard'){battle.guard=true;dmg=0;document.querySelector('#log').textContent='AI-01 membentuk Guardian Barrier. Damage berikutnya berkurang.'}if(type==='potion'){if(player.potions<=0||player.hp>=100){document.querySelector('#log').textContent='Potion tidak dapat digunakan.';return}player.potions--;player.hp=Math.min(100,player.hp+35);document.querySelector('#log').textContent='Elara menggunakan potion. +35 HP.'}if(dmg){battle.enemyHp=Math.max(0,battle.enemyHp-dmg);battle.enemy.hp=battle.enemyHp;const p=battle.enemy.mesh.position;battle.enemy.mesh.position.y=.15;setTimeout(()=>battle.enemy.mesh.position.y=0,130)}updateBattle();endTurn()}
+function closeBattle(){battle.active=false;document.querySelector('#battle').classList.remove('show');document.querySelector('#hint').style.display='block';document.querySelector('#turn').textContent='PLAYER TURN';updateBattle()}
+document.querySelector('#attack').onclick=()=>act('attack');document.querySelector('#skill').onclick=()=>act('skill');document.querySelector('#guard').onclick=()=>act('guard');document.querySelector('#potion').onclick=()=>act('potion');document.querySelector('#retreat').onclick=()=>{closeBattle();toast('Party mundur dari pertarungan.')};
+function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;
+ if(!battle.active){let dx=0,dz=0;const speed=keys.shift?7:4.2;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;const l=Math.hypot(dx,dz)||1;dx=dx/l*speed*dt;dz=dz/l*speed*dt;const nx=player.x+dx,nz=player.z+dz;if(!collides(nx,player.z))player.x=nx;if(!collides(player.x,nz))player.z=nz;
+ hero.position.set(player.x,Math.abs(Math.sin(now*.006))*.035,player.z);if(dx||dz)hero.rotation.y=Math.atan2(dx,dz)+Math.PI;const e=nearestEnemy();if(e)document.querySelector('#hint').textContent='Tekan E untuk memulai pertarungan';else document.querySelector('#hint').textContent='Jelajahi reruntuhan · E: kumpulkan residu Aether';
+ const cx=Math.floor(player.x/chunkSize),cz=Math.floor(player.z/chunkSize);if(!chunks.has(chunkKey(cx,cz))||now%1200<20)updateChunks();
+ }
+ const target=new THREE.Vector3(player.x,0,player.z);camera.position.lerp(new THREE.Vector3(player.x+9,player.z+11,player.z+13),.06);camera.lookAt(target.x,0.8,target.z);renderer.render(scene,camera);
+}
+updateChunks();requestAnimationFrame(animate);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script></body></html>
