@@ -48,7 +48,7 @@ import * as THREE from 'three';
 
 const root=document.querySelector('#view');
 const scene=new THREE.Scene(); scene.background=new THREE.Color(0x91b9cf); scene.fog=new THREE.Fog(0x91b9cf,28,78);
-const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,150); camera.position.set(9,12,15);
+const camera=new THREE.OrthographicCamera(-13,13,13,-13,.1,180); camera.position.set(12,16,12); camera.zoom=1.05; camera.updateProjectionMatrix();
 const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,1.7)); renderer.setSize(innerWidth,innerHeight); renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; root.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xdceeff,0x506247,2.0));
 const sun=new THREE.DirectionalLight(0xffedcf,2.4);sun.position.set(-12,20,9);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
@@ -75,8 +75,8 @@ function makeHero(){
 }
 hero.add(makeHero());hero.position.set(0,0,0);
 function seeded(a,b){let n=Math.sin(a*127.1+b*311.7+71.3)*43758.5453;return n-Math.floor(n)}
-function addTree(group,x,z,s=1){const t=new THREE.Group();t.position.set(x,0,z);box(t,.28*s,1.4*s,.28*s,mats.trunk,0,.7*s,0);for(let i=0;i<3;i++){const cone=new THREE.Mesh(new THREE.ConeGeometry(.9*s-i*.12,1.5*s,6),i===1?mats.grass2:mats.leaf);cone.position.set(0,1.5*s+i*.45*s,0);cone.castShadow=true;t.add(cone)}group.add(t);obstacles.push({x:x+group.position.x,z:z+group.position.z,r:.62*s})}
-function addRock(group,x,z,s=1){const r=new THREE.Mesh(new THREE.DodecahedronGeometry(.55*s,0),mats.stone);r.position.set(x,.38*s,z);r.scale.y=.8;r.castShadow=true;r.receiveShadow=true;group.add(r);obstacles.push({x:x+group.position.x,z:z+group.position.z,r:.55*s})}
+function addTree(group,x,z,s=1){const t=new THREE.Group();t.position.set(x,0,z);box(t,.42*s,1.35*s,.42*s,mats.trunk,0,.68*s,0);box(t,1.55*s,.72*s,1.55*s,mats.leaf,0,1.55*s,0);box(t,1.2*s,.65*s,1.2*s,mats.grass2,0,2.15*s,0);box(t,.72*s,.55*s,.72*s,mats.leaf,0,2.68*s,0);group.add(t);obstacles.push({x:x+group.position.x,z:z+group.position.z,r:.72*s})}
+function addRock(group,x,z,s=1){const r=new THREE.Group();r.position.set(x,0,z);box(r,.9*s,.65*s,.8*s,mats.stone,0,.32*s,0);box(r,.55*s,.45*s,.6*s,mats.moss,.08*s,.82*s,0);group.add(r);obstacles.push({x:x+group.position.x,z:z+group.position.z,r:.62*s})}
 function addCrystal(group,x,z){const c=new THREE.Mesh(new THREE.OctahedronGeometry(.48),mats.crystal);c.position.set(x,.75,z);c.rotation.z=.2;c.castShadow=true;group.add(c);const glow=new THREE.PointLight(0x38cfff,.55,3);glow.position.set(x,1,z);group.add(glow)}
 function addSentinel(group,x,z,key){const e=new THREE.Group();e.position.set(x,0,z);
  box(e,.78,1.1,.65,mats.dark,0,1.05,0);box(e,.95,.48,.72,mats.red,0,1.75,0);box(e,.52,.4,.52,mats.stone,0,2.17,0);box(e,.4,.12,.1,mats.crystal,0,2.18,-.28);
@@ -88,7 +88,7 @@ function chunkKey(cx,cz){return cx+','+cz}
 function makeChunk(cx,cz){
  const key=chunkKey(cx,cz);if(chunks.has(key))return;
  const g=new THREE.Group();g.position.set(cx*chunkSize,0,cz*chunkSize);world.add(g);
- const floor=new THREE.Mesh(groundGeo,new THREE.MeshStandardMaterial({color:seeded(cx,cz)>.5?0x4c8059:0x56865e}));floor.scale.set(chunkSize,.15,chunkSize);floor.position.set(chunkSize/2,-.25,chunkSize/2);floor.receiveShadow=true;g.add(floor);
+ for(let tx=0;tx<4;tx++)for(let tz=0;tz<4;tz++){const h=.55+seeded(cx*31+tx,cz*29+tz)*.12;const tile=new THREE.Mesh(new THREE.BoxGeometry(4,h,4),new THREE.MeshStandardMaterial({color:seeded(cx*13+tx,cz*17+tz)>.5?0x4c8059:0x56865e}));tile.position.set(tx*4+2,-h/2,tz*4+2);tile.receiveShadow=true;tile.castShadow=true;g.add(tile);if(seeded(cx*7+tx,cz*11+tz)>.83){box(g,.8,.16,.8,mats.grass2,tx*4+1.4,.03,tz*4+1.3)}}
  for(let i=0;i<18;i++){const x=1+seeded(cx*13+i,cz*9)*14,z=1+seeded(cx*7,cz*17+i)*14,v=seeded(cx+i,cz-i);if(v<.42)addTree(g,x,z,.7+v*.8);else if(v<.62)addRock(g,x,z,.7+v);else if(v<.76)addCrystal(g,x,z)}
  // ancient ruin fragments
  if(seeded(cx+44,cz-18)>.45){for(let k=0;k<3;k++){box(g,.45,2.7,.45,mats.stone,4+k*1.5,1.35,11);box(g,.7,.25,.65,mats.gold,4+k*1.5,2.8,11)}}
@@ -131,5 +131,5 @@ document.querySelector('#touchInteract').addEventListener('click',interact);
 document.querySelector('#touchGather').addEventListener('click',()=>{if(!battle.active){player.ap=Math.min(40,player.ap+5);document.querySelector('#ap').textContent=player.ap;toast('Residu Aether +5 AP')}});
 document.querySelector('#touchDodge').addEventListener('click',()=>{if(!battle.active){const len=Math.hypot(touchMove.x,touchMove.y)||1;player.x+=(touchMove.x/len||0)*1.8;player.z+=(touchMove.y/len||-1)*1.8;hero.position.set(player.x,0,player.z);updateChunks();toast('Dodge!')}});
 document.addEventListener('contextmenu',e=>e.preventDefault());
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+addEventListener('resize',()=>{const aspect=innerWidth/innerHeight;camera.left=-13*aspect;camera.right=13*aspect;camera.top=13;camera.bottom=-13;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script></body></html>
