@@ -116,7 +116,7 @@ function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last
  hero.position.set(player.x,Math.abs(Math.sin(now*.006))*.035,player.z);if(dx||dz)hero.rotation.y=Math.atan2(dx,dz)+Math.PI;const e=nearestEnemy();if(e)document.querySelector('#hint').textContent='Tekan E untuk memulai pertarungan';else document.querySelector('#hint').textContent='Jelajahi reruntuhan · E: kumpulkan residu Aether';
  const cx=Math.floor(player.x/chunkSize),cz=Math.floor(player.z/chunkSize);if(!chunks.has(chunkKey(cx,cz))||now%1200<20)updateChunks();
  }
- const target=new THREE.Vector3(player.x,0,player.z);camera.position.lerp(new THREE.Vector3(player.x+9,player.z+11,player.z+13),.06);camera.lookAt(target.x,0.8,target.z);renderer.render(scene,camera);
+ const target=new THREE.Vector3(player.x,0,player.z);camera.position.lerp(new THREE.Vector3(player.x+12,16,player.z+12),.08);camera.lookAt(target.x,0.8,target.z);renderer.render(scene,camera);
 }
 updateChunks();requestAnimationFrame(animate);
 // Mobile virtual joystick and touch actions
